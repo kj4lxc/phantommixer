@@ -1,0 +1,9 @@
+{
+  "domain": "mixer",
+  "name": "Custom Mixer Integration",
+  "codeowners": ["@kj4lxc"],
+  "dependencies": [],
+  "iot_class": "local_polling",
+  "requirements": ["xair_api"],
+  "version": "1.0.0"
+}
