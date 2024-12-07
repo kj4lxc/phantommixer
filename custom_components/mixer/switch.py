@@ -82,7 +82,7 @@ class CustomSwitchEntity(SwitchEntity):
         self._is_on = state[0] == 1
         self._available = True  # Switch is available if we got a valid response
     except Exception as e:
-      _LOGGER.error("Failed to update state for switch %s: %s", self._index, str(e))
+      # _LOGGER.error("Failed to update state for switch %s: %s", self._index, str(e))
       self._available = False  # Mark the switch as unavailable if there's an error
     finally:
       self.schedule_update_ha_state()
