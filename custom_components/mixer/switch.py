@@ -2,6 +2,7 @@ from homeassistant.components.switch import SwitchEntity
 from datetime import timedelta
 import logging
 import xair_api
+from ping3 import ping
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -54,12 +55,9 @@ class CustomSwitchEntity(SwitchEntity):
       with xair_api.connect("XR12", ip=self._host, connect_timeout=2) as mixer:
         mixer.send(f"/headamp/{self._index}/phantom", 1)
       self._is_on = True
-      self.schedule_update_ha_state()
     except Exception as e:
       _LOGGER.error("Failed turn on for switch %s: %s", self._index, str(e))
       self._available = False
-    finally:
-      self.schedule_update_ha_state()
 
   def turn_off(self, **kwargs):
     """Turn the switch off."""
@@ -67,22 +65,28 @@ class CustomSwitchEntity(SwitchEntity):
       with xair_api.connect("XR12", ip=self._host, connect_timeout=2) as mixer:
         mixer.send(f"/headamp/{self._index}/phantom", 0)
       self._is_on = False
-      self.schedule_update_ha_state()
     except Exception as e:
       _LOGGER.error("Failed turn off for switch %s: %s", self._index, str(e))
       self._available = False
-    finally:
       self.schedule_update_ha_state()
         
   def update(self):
     """Fetch the latest state."""
-    try:
-      with xair_api.connect("XR12", ip=self._host, connect_timeout=2) as mixer:
-        state = mixer.query(f"/headamp/{self._index}/phantom")
-        self._is_on = state[0] == 1
-        self._available = True  # Switch is available if we got a valid response
-    except Exception as e:
-      # _LOGGER.error("Failed to update state for switch %s: %s", self._index, str(e))
-      self._available = False  # Mark the switch as unavailable if there's an error
-    finally:
+    previous_availability = self._available
+    response = ping(self._host, timeout = 1)
+    if response:
+      try:
+        with xair_api.connect("XR12", ip=self._host, connect_timeout=2) as mixer:
+          state = mixer.query(f"/headamp/{self._index}/phantom")
+          self._is_on = state[0] == 1
+          self._available = True  # Switch is available if we got a valid response
+      except Exception as e:
+        # _LOGGER.error("Failed to update state for switch %s: %s", self._index, str(e))
+        self._available = False  # Mark the switch as unavailable if there's an error
+    else:
+      self._available = False
+      
+    if self._available != previous_availability:
       self.schedule_update_ha_state()
+    
+      

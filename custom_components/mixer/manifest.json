@@ -4,6 +4,6 @@
   "codeowners": ["@kj4lxc"],
   "dependencies": [],
   "iot_class": "local_polling",
-  "requirements": ["xair_api"],
-  "version": "1.0.0"
+  "requirements": ["xair_api","ping3"],
+  "version": "2.0.0"
 }
